@@ -1,24 +1,8 @@
+#
+
+Build off of https://github.com/honey93/OrderKitchen.
+
 # Project consist of both Backend and Frontend code
-
-## Folder Structure : -
-
-### Go to the root directory in the source code and find out the below-mentioned files. This architecture helps in creating a big modular App:
-
-       backend-my-app /* Backend of the code goes here */
-        server.js
-        package.json /* Backend dependency */
-       build/      /* Optional for deployment of Frontend Build */
-       public/
-       src/        /*      Frontend Sourcecode      */
-        global/      /*   Components getting used everywhere   */
-         header.css
-         header.js
-        main/
-         Kitchen.js
-         PlaceOrder.js
-         UpdatePredicted.js
-         App.js   /* Routing logic and component assembly part */
-       package.json /* Frontend dependency */
 
 ## Available Scripts
 
