@@ -53,6 +53,16 @@ io.on("connection", socket => {
         }
     });
 
+    // AUSTIN
+    socket.on("initial_calc_data", async () => {
+        try {
+            const calculations = await Calculations.find({});
+            io.sockets.emit("get_calc_data", calculations);
+        } catch (error) {
+            console.log("error with initial_calc_data: ", error);
+        }
+    });
+
     // Placing the order, gets called from /src/main/PlaceOrder.js of Frontend
     socket.on("putOrder", order => {
         FoodItems.update(
@@ -68,8 +78,9 @@ io.on("connection", socket => {
     // TODO: when a calculation is completed, send it to the database
     socket.on("send_calculation", equation => {
         Calculations.create({ equation })
-            .then({
+            .then(calculation => {
                 // TODO: maybe have to do something here like in mark_done?
+                io.sockets.emit("change_calc_data");
             })
             .catch(error => {
                 console.log("error creating equation: ", error);

@@ -6,7 +6,8 @@ class Calculator extends Component {
     constructor() {
         super();
         this.state = {
-            food_data: []
+            food_data: [],
+            calculations: []
             // this is where we are connecting to with sockets,
         };
     }
@@ -16,18 +17,36 @@ class Calculator extends Component {
         this.setState({ food_data: calculations });
     };
 
-    changeData = () => socket.emit("initial_data_calcs");
+    // update the calculations in state, which will update the table
+    getCalculationData = calculations => {
+        console.log("calculations: ", calculations);
+        this.setState({ calculations });
+        console.log("calculations: ", calculations);
+    };
+
+    changeData = () => socket.emit("initial_data");
+
+    changeCalcData = () => socket.emit("initial_calc_data");
 
     componentDidMount() {
         var state_current = this;
         socket.emit("initial_data");
         socket.on("get_data", this.getData);
         socket.on("change_data", this.changeData);
+
+        // AUSTIN
+        socket.emit("initial_calc_data");
+        socket.on("get_calc_data", this.getCalculationData);
+        socket.on("change_calc_data", this.changeCalcData);
     }
 
     componentWillUnmount() {
         socket.off("get_data");
         socket.off("change_data");
+
+        // AUSTIN
+        socket.off("get_calc_data");
+        socket.off("change_calc_data");
     }
 
     // markDone = id => {
@@ -39,15 +58,15 @@ class Calculator extends Component {
         socket.emit("send_calculation", calculation);
     };
 
-    getCalculationData() {
-        return this.state.food_data.map(food => {
+    calculationRows = () => {
+        return this.state.calculations.map(calculation => {
             return (
-                <tr key={food._id}>
-                    <td>{food._id}</td>
+                <tr key={calculation._id}>
+                    <td>{calculation.equation}</td>
                 </tr>
             );
         });
-    }
+    };
 
     // update the input and state when the input box is changed
     onTextChange = event => {
@@ -74,7 +93,7 @@ class Calculator extends Component {
                             <th>Prior Calculations</th>
                         </tr>
                     </thead>
-                    <tbody>{this.getCalculationData()}</tbody>
+                    <tbody>{this.calculationRows()}</tbody>
                 </Table>
             </Container>
         );
