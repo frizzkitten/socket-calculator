@@ -3,7 +3,7 @@ const http = require("http");
 const socketIO = require("socket.io");
 
 var connection_string =
-    "mongodb+srv://austin:GdXhpp5P5pfUOtlf@cluster0-yn6k2.mongodb.net/test?retryWrites=true&w=majority";
+    "mongodb+srv://austin:GdXhpp5P5pfUOtlf@cluster0-yn6k2.mongodb.net/orderkitchen?retryWrites=true&w=majority";
 // Connection string of MongoDb database hosted on Mlab or locally
 // Collection name should be "FoodItems", only one collection as of now.
 // Document format should be as mentioned below, at least one such document:
@@ -21,7 +21,7 @@ var connection_string =
 let mongoose = require("mongoose");
 mongoose.connect(
     connection_string,
-    { useNewUrlParser: true }
+    { useNewUrlParser: true, useUnifiedTopology: true }
 );
 let db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -54,17 +54,12 @@ io.on("connection", socket => {
 
     // Returning the initial data of food menu from FoodItems collection
     socket.on("initial_data", async () => {
-        console.log("initial_data call!");
-        // collection_foodItems.create({
-        //     name: "Veg Roll",
-        //     predQty: 100,
-        //     prodQty: 295,
-        //     ordQty: 1
-        // });
-        const docs = await collection_foodItems.find({});
-
-        console.log("docs: ", docs);
-        io.sockets.emit("get_data", docs);
+        try {
+            const docs = await collection_foodItems.find({});
+            io.sockets.emit("get_data", docs);
+        } catch (error) {
+            console.log("error: ", error);
+        }
     });
 
     // Placing the order, gets called from /src/main/PlaceOrder.js of Frontend
