@@ -27,6 +27,7 @@ db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => console.log("connected to db!"));
 
 const FoodItems = require("./schemas/FoodItemSchema");
+const Calculations = require("./schemas/CalculationSchema");
 
 // our localhost port
 const port = process.env.PORT || 3001;
