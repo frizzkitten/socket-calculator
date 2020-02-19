@@ -2,21 +2,11 @@ const express = require("express");
 const http = require("http");
 const socketIO = require("socket.io");
 
+// CONNECT TO THE DB
+// Connection string of MongoDb database hosted on Mlab or locally
+// Collection name should be "calculations"
 var connection_string =
     "mongodb+srv://austin:GdXhpp5P5pfUOtlf@cluster0-yn6k2.mongodb.net/orderkitchen?retryWrites=true&w=majority";
-// Connection string of MongoDb database hosted on Mlab or locally
-// Collection name should be "FoodItems", only one collection as of now.
-// Document format should be as mentioned below, at least one such document:
-// {
-//     "_id": {
-//         "$oid": "5c0a1bdfe7179a6ca0844567"
-//     },
-//     "name": "Veg Roll",
-//     "predQty": 100,
-//     "prodQty": 295,
-//     "ordQty": 1
-// }
-
 let mongoose = require("mongoose");
 mongoose.connect(
     connection_string,
@@ -26,7 +16,7 @@ let db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => console.log("connected to db!"));
 
-const FoodItems = require("./schemas/FoodItemSchema");
+// get the db schema
 const Calculations = require("./schemas/CalculationSchema");
 
 // our localhost port
@@ -43,17 +33,7 @@ const io = socketIO(server);
 io.on("connection", socket => {
     console.log("New client connected" + socket.id);
 
-    // Returning the initial data of food menu from FoodItems collection
-    socket.on("initial_data", async () => {
-        try {
-            const docs = await FoodItems.find({});
-            io.sockets.emit("get_data", docs);
-        } catch (error) {
-            console.log("error: ", error);
-        }
-    });
-
-    // AUSTIN
+    // return initial data of calculations
     socket.on("initial_calc_data", async () => {
         try {
             const calculations = await Calculations.find({});
@@ -63,56 +43,15 @@ io.on("connection", socket => {
         }
     });
 
-    // Placing the order, gets called from /src/main/PlaceOrder.js of Frontend
-    socket.on("putOrder", order => {
-        FoodItems.update(
-            { _id: order._id },
-            { $inc: { ordQty: order.order } }
-        ).then(updatedDoc => {
-            // Emitting event to update the Kitchen opened across the devices with the realtime order values
-            io.sockets.emit("change_data");
-        });
-    });
-
-    // AUSTIN
-    // TODO: when a calculation is completed, send it to the database
+    // when a calculation is completed, send it to the database
     socket.on("send_calculation", equation => {
         Calculations.create({ equation })
-            .then(calculation => {
-                // TODO: maybe have to do something here like in mark_done?
-                io.sockets.emit("change_calc_data");
-            })
-            .catch(error => {
-                console.log("error creating equation: ", error);
-            });
-    });
-
-    // Order completion, gets called from /src/main/Kitchen.js
-    socket.on("mark_done", id => {
-        FoodItems.update(
-            { _id: id },
-            { $inc: { ordQty: -1, prodQty: 1 } }
-        ).then(updatedDoc => {
-            //Updating the different Kitchen area with the current Status.
-            io.sockets.emit("change_data");
-        });
-    });
-
-    // Functionality to change the predicted quantity value, called from /src/main/UpdatePredicted.js
-    socket.on("ChangePred", predicted_data => {
-        FoodItems.update(
-            { _id: predicted_data._id },
-            { $set: { predQty: predicted_data.predQty } }
-        ).then(updatedDoc => {
-            // Socket event to update the Predicted quantity across the Kitchen
-            io.sockets.emit("change_data");
-        });
+            .then(calculation => io.sockets.emit("change_calc_data"))
+            .catch(error => console.log("error creating equation: ", error));
     });
 
     // disconnect is fired when a client leaves the server
-    socket.on("disconnect", () => {
-        console.log("user disconnected");
-    });
+    socket.on("disconnect", () => console.log("user disconnected"));
 });
 
 /* Below mentioned steps are performed to return the Frontend build of create-react-app from build folder of backend */
