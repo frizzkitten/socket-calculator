@@ -1,8 +1,10 @@
-// var FoodItemSchema = new mongoose.Schema({
-//     name: String,
-//     predQty: Number,
-//     prodQty: Number,
-//     ordQty: Number
-// });
-//
-// export default mongoose.model("FoodItem", FoodItemSchema);
+const mongoose = require("mongoose");
+
+var FoodItemSchema = new mongoose.Schema({
+    name: String,
+    predQty: Number,
+    prodQty: Number,
+    ordQty: Number
+});
+
+module.exports = mongoose.model("FoodItem", FoodItemSchema);
