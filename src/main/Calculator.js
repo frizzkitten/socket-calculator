@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import { Button, Table, Container } from "reactstrap";
-import { socket } from "../global/header";
+
+import socketIOClient from "socket.io-client";
+let socket;
+const endpoint = "http://localhost:3001/"; // Update 3001 with port on which backend-my-app/server.js is running.
+socket = socketIOClient(endpoint);
 
 class Calculator extends Component {
     constructor(props) {
@@ -55,9 +59,9 @@ class Calculator extends Component {
                     value={this.state.text}
                     onChange={this.onTextChange}
                 />
-                <button onClick={() => this.sendCalculation(this.state.text)}>
+                <Button onClick={() => this.sendCalculation(this.state.text)}>
                     Send
-                </button>
+                </Button>
 
                 <Table striped id="table-to-xls">
                     <thead>
