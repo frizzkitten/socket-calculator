@@ -6,6 +6,7 @@ import { Switch, Route } from "react-router-dom";
 import PlaceOrder from "./main/PlaceOrder";
 import UpdatePredicted from "./main/UpdatePredicted";
 import Kitchen from "./main/Kitchen";
+import Calculator from "./main/Calculator";
 
 /*The <Route> component is the main part of React Router. Anywhere that you want to only render content based on the location’s pathname, you should use a <Route> element. */
 
@@ -25,6 +26,7 @@ class App extends Component {
                         component={UpdatePredicted}
                     />
                     <Route path="/kitchen" component={Kitchen} />
+                    <Route path="/calculator" component={Calculator} />
                 </Switch>
             </div>
         );

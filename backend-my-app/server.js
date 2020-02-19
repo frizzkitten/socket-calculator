@@ -64,6 +64,18 @@ io.on("connection", socket => {
         });
     });
 
+    // AUSTIN
+    // TODO: when a calculation is completed, send it to the database
+    socket.on("send_calculation", equation => {
+        Calculations.create({ equation })
+            .then({
+                // TODO: maybe have to do something here like in mark_done?
+            })
+            .catch(error => {
+                console.log("error creating equation: ", error);
+            });
+    });
+
     // Order completion, gets called from /src/main/Kitchen.js
     socket.on("mark_done", id => {
         FoodItems.update(
