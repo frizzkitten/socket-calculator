@@ -34,6 +34,7 @@ class Calculator extends Component {
     //     socket.emit("mark_done", id);
     // };
 
+    // send the calculation to the database
     sendCalculation = calculation => {
         socket.emit("send_calculation", calculation);
     };
@@ -42,22 +43,30 @@ class Calculator extends Component {
         return this.state.food_data.map(food => {
             return (
                 <tr key={food._id}>
-                    <td>
-                        <button
-                            onClick={() => this.sendCalculation("9 x 9 = 81")}
-                        >
-                            Done
-                        </button>
-                    </td>
+                    <td>{food._id}</td>
                 </tr>
             );
         });
     }
 
+    // update the input and state when the input box is changed
+    onTextChange = event => {
+        this.setState({ text: event.currentTarget.value });
+    };
+
     render() {
         return (
             <Container>
                 <h2 className="h2Class">Big Brother Calculator</h2>
+
+                <input
+                    type="text"
+                    value={this.state.text}
+                    onChange={this.onTextChange}
+                />
+                <button onClick={() => this.sendCalculation(this.state.text)}>
+                    Send
+                </button>
 
                 <Table striped id="table-to-xls">
                     <thead>
