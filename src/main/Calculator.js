@@ -3,55 +3,27 @@ import { Button, Table, Container } from "reactstrap";
 import { socket } from "../global/header";
 
 class Calculator extends Component {
-    constructor() {
-        super();
-        this.state = {
-            food_data: [],
-            calculations: []
-            // this is where we are connecting to with sockets,
-        };
+    constructor(props) {
+        super(props);
+        // socket will fill in the calculations
+        this.state = { calculations: [] };
     }
 
-    getData = calculations => {
-        console.log(calculations);
-        this.setState({ food_data: calculations });
-    };
-
     // update the calculations in state, which will update the table
-    getCalculationData = calculations => {
-        console.log("calculations: ", calculations);
-        this.setState({ calculations });
-        console.log("calculations: ", calculations);
-    };
-
-    changeData = () => socket.emit("initial_data");
+    getCalculationData = calculations => this.setState({ calculations });
 
     changeCalcData = () => socket.emit("initial_calc_data");
 
     componentDidMount() {
-        var state_current = this;
-        socket.emit("initial_data");
-        socket.on("get_data", this.getData);
-        socket.on("change_data", this.changeData);
-
-        // AUSTIN
         socket.emit("initial_calc_data");
         socket.on("get_calc_data", this.getCalculationData);
         socket.on("change_calc_data", this.changeCalcData);
     }
 
     componentWillUnmount() {
-        socket.off("get_data");
-        socket.off("change_data");
-
-        // AUSTIN
         socket.off("get_calc_data");
         socket.off("change_calc_data");
     }
-
-    // markDone = id => {
-    //     socket.emit("mark_done", id);
-    // };
 
     // send the calculation to the database
     sendCalculation = calculation => {
