@@ -7,7 +7,8 @@ import { getCalculationParts, calculateFromParts } from "./util";
 
 import socketIOClient from "socket.io-client";
 let socket;
-const endpoint = "https://cryptic-sands-03425.herokuapp.com/"; // Update 3001 with port on which backend-my-app/server.js is running.
+// const endpoint = "http://localhost:3001/"; // Update 3001 with port on which backend-my-app/server.js is running.
+const endpoint = "https://cryptic-sands-03425.herokuapp.com/";
 socket = socketIOClient(endpoint);
 
 // send the calculation to the database
