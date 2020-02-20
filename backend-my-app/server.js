@@ -6,7 +6,7 @@ const socketIO = require("socket.io");
 // Connection string of MongoDb database hosted on Mlab or locally
 // Collection name should be "calculations"
 var connection_string =
-    "mongodb+srv://austin:GdXhpp5P5pfUOtlf@cluster0-yn6k2.mongodb.net/orderkitchen?retryWrites=true&w=majority";
+    "mongodb+srv://austin:GdXhpp5P5pfUOtlf@cluster0-yn6k2.mongodb.net/calculator?retryWrites=true&w=majority";
 let mongoose = require("mongoose");
 mongoose.connect(
     connection_string,
@@ -35,17 +35,17 @@ io.on("connection", socket => {
 
     // return initial data of calculations
     socket.on("initial_data", async () => {
-        try {
-            const calculations = await Calculations.find({});
-            io.sockets.emit("get_data", calculations);
-        } catch (error) {
-            console.log("error with initial_data: ", error);
-        }
+        Calculations.find({}, {}, { sort: { date: -1 } })
+            .limit(10)
+            .exec((error, calculations) => {
+                if (error) console.log("error with initial_data: ", error);
+                io.sockets.emit("get_data", calculations);
+            });
     });
 
     // when a calculation is completed, send it to the database
     socket.on("send_calculation", equation => {
-        Calculations.create({ equation })
+        Calculations.create({ equation, date: new Date() })
             .then(calculation => io.sockets.emit("change_data"))
             .catch(error => console.log("error creating equation: ", error));
     });

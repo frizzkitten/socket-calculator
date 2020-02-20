@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 var CalculationSchema = new mongoose.Schema({
-    equation: String
+    equation: String,
+    date: Date
 });
 
 module.exports = mongoose.model("calculation", CalculationSchema);
