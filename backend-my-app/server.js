@@ -6,7 +6,7 @@ const socketIO = require("socket.io");
 // Connection string of MongoDb database hosted on Mlab or locally
 // Collection name should be "calculations"
 var connection_string =
-    "mongodb+srv://austin:GdXhpp5P5pfUOtlf@cluster0-yn6k2.mongodb.net/calculator?retryWrites=true&w=majority";
+    "mongodb+srv://austin:64PXKSwyJKToP6A7@cluster0-ij2mb.mongodb.net/calculator?retryWrites=true&w=majority";
 let mongoose = require("mongoose");
 mongoose.connect(
     connection_string,

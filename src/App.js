@@ -71,10 +71,10 @@ class App extends Component {
         return (
             <div className="App">
                 <Container>
-                    <h2 className="h2Class">Big Brother Calculator</h2>
+                    <h2 className="header">Big Brother Calculator</h2>
 
                     {!!error && <div className="error">{error}</div>}
-                    <input type="text" id="calc-input" />
+                    <input type="text" id="calc-input" className="calc-input" />
                     <Button onClick={this.calculate}>Send</Button>
 
                     <CalculationTable calculations={calculations} />
@@ -86,7 +86,7 @@ class App extends Component {
 
 // shows the previous 10 calculations
 const CalculationTable = ({ calculations }) => (
-    <Table striped id="table-to-xls">
+    <Table striped id="table-to-xls" className="table">
         <thead>
             <tr>
                 <th>Prior Calculations</th>

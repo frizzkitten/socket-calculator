@@ -1,6 +1,6 @@
-#
+# Austin Meyer Calculator Coding Challenge
 
-Build off of https://github.com/honey93/OrderKitchen.
+Built off of https://github.com/honey93/OrderKitchen.
 
 # Project consist of both Backend and Frontend code
 
