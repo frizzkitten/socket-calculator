@@ -110,8 +110,6 @@ function doOperations(p, operations) {
                 .slice(0, partIndex - 1)
                 .concat(result)
                 .concat(parts.slice(partIndex + 2));
-
-            console.log("updated parts: ", parts);
         }
         // otherwise move on to the next operator
         else partIndex += 2;

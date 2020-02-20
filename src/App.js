@@ -40,7 +40,8 @@ class App extends Component {
     // do the math and then send the resulting string to the server
     calculate = () => {
         // get the input string
-        let input = document.getElementById("calc-input").value;
+        let inputEl = document.getElementById("calc-input");
+        let input = inputEl.value;
         if (input.length === 0) return;
 
         // get an array of numbers and operators
@@ -51,21 +52,18 @@ class App extends Component {
             else return this.setState({ error: "Invalid calculation." });
         }
 
-        console.log("parts: ", parts);
-        // calculate the result from those parts
-        const result = calculateFromParts(parts);
-
-        console.log("result: ", result);
-
-        let equation = input;
-
         // remove the error notification if it exists
         if (this.state.error) this.setState({ error: false });
 
-        console.log("success");
+        // calculate the result from those parts
+        const result = calculateFromParts(parts);
+        let equation = `${input} = ${result}`;
 
         // send the full equation string to the backend
-        // sendCalculation(equation);
+        sendCalculation(equation);
+
+        // clear the input box
+        inputEl.value = "";
     };
 
     render() {
