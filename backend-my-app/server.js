@@ -34,19 +34,19 @@ io.on("connection", socket => {
     console.log("New client connected" + socket.id);
 
     // return initial data of calculations
-    socket.on("initial_calc_data", async () => {
+    socket.on("initial_data", async () => {
         try {
             const calculations = await Calculations.find({});
-            io.sockets.emit("get_calc_data", calculations);
+            io.sockets.emit("get_data", calculations);
         } catch (error) {
-            console.log("error with initial_calc_data: ", error);
+            console.log("error with initial_data: ", error);
         }
     });
 
     // when a calculation is completed, send it to the database
     socket.on("send_calculation", equation => {
         Calculations.create({ equation })
-            .then(calculation => io.sockets.emit("change_calc_data"))
+            .then(calculation => io.sockets.emit("change_data"))
             .catch(error => console.log("error creating equation: ", error));
     });
 

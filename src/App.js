@@ -24,17 +24,17 @@ class App extends Component {
     // update the calculations in state, which will update the table
     getCalculationData = calculations => this.setState({ calculations });
 
-    changeCalcData = () => socket.emit("initial_calc_data");
+    changeCalcData = () => socket.emit("initial_data");
 
     componentDidMount() {
-        socket.emit("initial_calc_data");
-        socket.on("get_calc_data", this.getCalculationData);
-        socket.on("change_calc_data", this.changeCalcData);
+        socket.emit("initial_data");
+        socket.on("get_data", this.getCalculationData);
+        socket.on("change_data", this.changeCalcData);
     }
 
     componentWillUnmount() {
-        socket.off("get_calc_data");
-        socket.off("change_calc_data");
+        socket.off("get_data");
+        socket.off("change_data");
     }
 
     // do the math and then send the resulting string to the server
