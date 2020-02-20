@@ -1,5 +1,5 @@
 const validNumbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-const validOperators = ["x", "-", "/", "+"];
+const validOperators = ["^", "x", "-", "/", "+"];
 const validSymbols = validNumbers.concat(validOperators);
 
 // takes an input string and returns an array of numbers and operators
@@ -9,7 +9,7 @@ function getCalculationParts(input) {
 
     // check if there are invalid characters
     if (input.split("").some(c => !validSymbols.includes(c)))
-        throw "Only numbers, spaces, and x+-/ are allowed.";
+        throw "Only numbers, spaces, and ^x+-/ are allowed.";
 
     let partIsNumber = true;
     let parts = [];
@@ -49,6 +49,7 @@ function getCalculationParts(input) {
 }
 
 // operation functions
+const power = (a, b) => Math.pow(a, b);
 const subtract = (a, b) => a - b;
 const add = (a, b) => a + b;
 const multiply = (a, b) => a * b;
@@ -63,6 +64,9 @@ function calculateFromParts(p) {
 
     // go through each operator
     while (parts.length > 1) {
+        // exponents
+        parts = doOperations(parts, [{ symbol: "^", operation: power }]);
+
         // multiplication and division
         parts = doOperations(parts, [
             { symbol: "x", operation: multiply },
