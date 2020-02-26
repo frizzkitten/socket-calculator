@@ -147,4 +147,24 @@ function removeLastDot(calcParts) {
     return calcParts;
 }
 
-export { getCalculationParts, calculateFromParts, lastInfo, removeLastDot };
+// count the left and right parentheses
+function countParentheses(calcParts) {
+    let leftCount = 0;
+    let rightCount = 0;
+
+    // go through each part
+    calcParts.forEach(part => {
+        if (part === "(") leftCount++;
+        else if (part === ")") rightCount++;
+    });
+
+    return [leftCount, rightCount];
+}
+
+export {
+    getCalculationParts,
+    calculateFromParts,
+    lastInfo,
+    removeLastDot,
+    countParentheses
+};

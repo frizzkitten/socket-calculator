@@ -7,7 +7,8 @@ import {
     getCalculationParts,
     calculateFromParts,
     lastInfo,
-    removeLastDot
+    removeLastDot,
+    countParentheses
 } from "./util";
 
 import socketIOClient from "socket.io-client";
@@ -47,7 +48,10 @@ class App extends Component {
     constructor(props) {
         super(props);
         // socket will fill in the calculations
-        this.state = { calculations: [], calcParts: [] };
+        this.state = {
+            calculations: [],
+            calcParts: ["(", "x123.4", "(", "2345", ")"]
+        };
     }
 
     // update the calculations in state, which will update the table
@@ -211,7 +215,7 @@ class App extends Component {
         // cut out the last dot if the last character is a dot
         calcParts = removeLastDot(calcParts);
 
-        let { numParts, lastPart, lastChar } = lastInfo(calcParts);
+        const { numParts, lastPart, lastChar } = lastInfo(calcParts);
 
         // add the parenthesis if there are no other parts
         if (numParts === 0) calcParts.push("(");
@@ -228,7 +232,20 @@ class App extends Component {
 
     // adds an end parenthesis to the calculation
     addRightParenthesis = calcParts => {
-        // TODO
+        // there have to be more left parens than rights to add a right one
+        const [numLeft, numRight] = countParentheses(calcParts);
+        if (numLeft <= numRight) return;
+
+        // cut out the last dot if the last character is a dot
+        // this won't be saved if a paren ends up not being added
+        calcParts = removeLastDot(calcParts);
+        const { lastPart } = lastInfo(calcParts);
+
+        // if the last character is a number, add a right paren
+        if (numbers.includes(lastChar)) {
+            calcParts.push(")");
+            this.setState({ calcParts });
+        }
     };
 
     // adds an x, +, %, or / to the calculation
