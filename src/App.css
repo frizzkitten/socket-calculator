@@ -18,6 +18,22 @@
     margin: 0 15px;
 }
 
+.calc-buttons {
+    display: flex;
+    width: 280px;
+    flex-wrap: wrap;
+    margin: 0 auto;
+}
+
+.calc-buttons > div {
+    width: 25%;
+    padding: 10px;
+}
+
+.calc-buttons > div > button {
+    width: 80%;
+}
+
 .table {
     margin-top: 20px;
 }

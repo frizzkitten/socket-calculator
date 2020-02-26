@@ -18,7 +18,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         // socket will fill in the calculations
-        this.state = { calculations: [] };
+        this.state = { calculations: [], calcParts: [] };
     }
 
     // update the calculations in state, which will update the table
@@ -36,6 +36,16 @@ class App extends Component {
         socket.off("get_data");
         socket.off("change_data");
     }
+
+    // go through the parts start to finish
+
+    // any time you find a ), solve the equation in those parentheses
+
+    // then replace everything that was in parentheses with the new number
+
+    // if you get to the end, solve everything
+
+    // 1 x (3 + (4 - ((6 + 8) - 2)) - (10 x 11))
 
     // do the math and then send the resulting string to the server
     calculate = () => {
@@ -66,6 +76,12 @@ class App extends Component {
         inputEl.value = "";
     };
 
+    // when a button in the calculator is clicked
+    onButtonClick = event => {
+        const text = event.currentTarget.value;
+        console.log("Button clicked: ", text);
+    };
+
     render() {
         const { error, calculations } = this.state;
         return (
@@ -77,12 +93,49 @@ class App extends Component {
                     <input type="text" id="calc-input" className="calc-input" />
                     <Button onClick={this.calculate}>Send</Button>
 
+                    <CalcButtons onButtonClick={this.onButtonClick} />
+
                     <CalculationTable calculations={calculations} />
                 </Container>
             </div>
         );
     }
 }
+
+const buttonTexts = [
+    "(",
+    ")",
+    "%",
+    "C",
+    "7",
+    "8",
+    "9",
+    "/",
+    "4",
+    "5",
+    "6",
+    "x",
+    "1",
+    "2",
+    "3",
+    "-",
+    "0",
+    ".",
+    "=",
+    "+"
+];
+
+const CalcButtons = ({ onButtonClick }) => (
+    <div className="calc-buttons">
+        {buttonTexts.map(text => (
+            <div key={text}>
+                <Button onClick={onButtonClick} value={text}>
+                    {text}
+                </Button>
+            </div>
+        ))}
+    </div>
+);
 
 // shows the previous 10 calculations
 const CalculationTable = ({ calculations }) => (
