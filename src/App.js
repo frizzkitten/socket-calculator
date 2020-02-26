@@ -161,7 +161,7 @@ class App extends Component {
         const { numParts, lastPart, lastChar } = lastInfo(calcParts);
 
         // if there is nothing yet, just add the number
-        if (numParts == 0) calcParts = [text];
+        if (numParts === 0) calcParts = [text];
         else {
             // if last was and end parenthesis, include a multiply sign
             if (lastPart === ")") calcParts = calcParts.concat(["x", text]);
@@ -185,7 +185,7 @@ class App extends Component {
         const { numParts, lastPart } = lastInfo(calcParts);
 
         // if there is nothing in calcParts, add a dot
-        if (numParts == 0) return this.setState({ calcParts: ["."] });
+        if (numParts === 0) return this.setState({ calcParts: ["."] });
 
         // as long as there is no decimal already, treat it as a number
         if (!lastPart.includes(".")) this.addNumber(calcParts, ".");
@@ -212,7 +212,7 @@ class App extends Component {
         // cut out the last dot if the last character is a dot
         calcParts = removeLastDot(calcParts);
 
-        const { numParts, lastPart, lastChar } = lastInfo(calcParts);
+        const { numParts, lastChar } = lastInfo(calcParts);
 
         // add the parenthesis if there are no other parts
         if (numParts === 0) calcParts.push("(");
@@ -233,9 +233,6 @@ class App extends Component {
         const [numLeft, numRight] = countParentheses(calcParts);
         if (numLeft <= numRight) return;
 
-        // cut out the last dot if the last character is a dot
-        // this won't be saved if a paren ends up not being added
-        calcParts = removeLastDot(calcParts);
         const { lastChar } = lastInfo(calcParts);
 
         // if the last character is a number, add a right paren
@@ -247,7 +244,7 @@ class App extends Component {
 
     // adds an x, +, %, or / to the calculation
     addSymbol = (calcParts, text) => {
-        const { numParts, lastPart, lastChar } = lastInfo(calcParts);
+        const { lastChar } = lastInfo(calcParts);
 
         if (numbers.concat(")").includes(lastChar)) {
             this.setState({ calcParts: calcParts.concat(text) });
@@ -256,7 +253,18 @@ class App extends Component {
 
     // add a - to the calculation
     addSubtraction = calcParts => {
-        // TODO
+        calcParts = removeLastDot(calcParts);
+
+        const { lastChar } = lastInfo(calcParts);
+
+        // do nothing if the last character is a - already
+        if (lastChar === "-") return;
+        // add subtract symbol for subtraction
+        else if (numbers.concat([")"]).includes(lastChar)) calcParts.push("-");
+        // add underscore for negative
+        else calcParts.push("_");
+
+        this.setState({ calcParts });
     };
 
     // calculate the end result and send it to the backend
