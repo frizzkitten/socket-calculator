@@ -118,4 +118,33 @@ function doOperations(p, operations) {
     return parts;
 }
 
-export { getCalculationParts, calculateFromParts };
+// returns the number of elements, the last element, and the last character of the last element
+function lastInfo(calcParts) {
+    const numParts = calcParts.length;
+    const lastPart = numParts ? calcParts[numParts - 1] : undefined;
+    const lastChar = lastPart
+        ? lastPart.charAt(lastPart.length - 1)
+        : undefined;
+
+    return { numParts, lastPart, lastChar };
+}
+
+// removes the last "." from calcParts if the last one is indeed a dot
+function removeLastDot(calcParts) {
+    const { numParts, lastPart, lastChar } = lastInfo(calcParts);
+
+    // don't cut anything out if the last character is not a dot
+    if (lastChar !== ".") return calcParts;
+
+    // cut off the last character of the last part
+    const newLastPart = lastPart.substr(0, lastPart.length - 1);
+
+    // if the part is now empty, get rid of it
+    if (newLastPart === "") calcParts = calcParts.slice(0, numParts - 1);
+    // otherwise, change the old last part into this new one without the dot
+    else calcParts[numParts - 1] = newLastPart;
+
+    return calcParts;
+}
+
+export { getCalculationParts, calculateFromParts, lastInfo, removeLastDot };

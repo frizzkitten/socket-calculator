@@ -3,7 +3,12 @@ import { Button, Table, Container } from "reactstrap";
 
 import "./App.css";
 
-import { getCalculationParts, calculateFromParts } from "./util";
+import {
+    getCalculationParts,
+    calculateFromParts,
+    lastInfo,
+    removeLastDot
+} from "./util";
 
 import socketIOClient from "socket.io-client";
 let socket;
@@ -126,8 +131,10 @@ class App extends Component {
                 this.backspace(calcParts);
                 break;
             case "(":
+                this.addLeftParenthesis(calcParts);
+                break;
             case ")":
-                this.addParenthesis(calcParts, text);
+                this.addRightParenthesis(calcParts);
                 break;
             case "%":
             case "+":
@@ -150,13 +157,11 @@ class App extends Component {
 
     // adds a number to the calculation
     addNumber = (calcParts, text) => {
-        // if there is nothing yet, just add the number
-        if (calcParts.length == 0) calcParts = [text];
-        else {
-            const lastIndex = calcParts.length - 1;
-            const lastPart = calcParts[lastIndex];
-            const lastChar = lastPart.charAt(lastPart.length - 1);
+        const { numParts, lastPart, lastChar } = lastInfo(calcParts);
 
+        // if there is nothing yet, just add the number
+        if (numParts == 0) calcParts = [text];
+        else {
             // if last was and end parenthesis, include a multiply sign
             if (lastPart === ")") calcParts = calcParts.concat(["x", text]);
             // if last was a number or dot or negative symbol, add this to that
@@ -165,7 +170,7 @@ class App extends Component {
                 lastChar === "." ||
                 lastChar === "_"
             )
-                calcParts[lastIndex] = lastPart + text;
+                calcParts[calcParts.length - 1] = lastPart + text;
             // otherwise just add the number
             else calcParts.push(text);
         }
@@ -173,17 +178,56 @@ class App extends Component {
         this.setState({ calcParts });
     };
 
+    // adds a decimal point - same as a number but can't be added if a number
+    // already has a decimal point in it
     addDecimal = calcParts => {
-        // TODO
+        const { numParts, lastPart } = lastInfo(calcParts);
+
+        // if there is nothing in calcParts, add a dot
+        if (numParts == 0) return this.setState({ calcParts: ["."] });
+
+        // as long as there is no decimal already, treat it as a number
+        if (!lastPart.includes(".")) this.addNumber(calcParts, ".");
     };
 
     // removes the last char from the calculation
     backspace = calcParts => {
-        // TODO
+        // do nothing if there's nothing typed in
+        const { numParts, lastPart } = lastInfo(calcParts);
+        if (numParts === 0) return;
+
+        const lastPartLength = lastPart.length;
+        // if the last part is only one character, just remove it
+        if (lastPartLength === 0) calcParts.pop();
+        // otherwise remove the last character of the last part
+        else
+            calcParts[numParts - 1] = lastPart.substring(0, lastPartLength - 1);
+
+        this.setState({ calcParts });
     };
 
-    // adds a forward or back parenthesis to the calculation
-    addParenthesis = (calcParts, paren) => {
+    // adds a start parenthesis to the calculation
+    addLeftParenthesis = calcParts => {
+        // cut out the last dot if the last character is a dot
+        calcParts = removeLastDot(calcParts);
+
+        let { numParts, lastPart, lastChar } = lastInfo(calcParts);
+
+        // add the parenthesis if there are no other parts
+        if (numParts === 0) calcParts.push("(");
+        else {
+            // if the last character is a number or end paren, add a multiplication symbol
+            if (numbers.concat(")").includes(lastChar)) calcParts.push("x");
+
+            // add in the left parenthesis
+            calcParts.push("(");
+        }
+
+        this.setState({ calcParts });
+    };
+
+    // adds an end parenthesis to the calculation
+    addRightParenthesis = calcParts => {
         // TODO
     };
 
