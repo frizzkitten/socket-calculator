@@ -48,10 +48,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         // socket will fill in the calculations
-        this.state = {
-            calculations: [],
-            calcParts: ["(", "x123.4", "(", "2345", ")"]
-        };
+        this.state = { calculations: [], calcParts: [] };
     }
 
     // update the calculations in state, which will update the table
@@ -239,7 +236,7 @@ class App extends Component {
         // cut out the last dot if the last character is a dot
         // this won't be saved if a paren ends up not being added
         calcParts = removeLastDot(calcParts);
-        const { lastPart } = lastInfo(calcParts);
+        const { lastChar } = lastInfo(calcParts);
 
         // if the last character is a number, add a right paren
         if (numbers.includes(lastChar)) {
@@ -250,7 +247,11 @@ class App extends Component {
 
     // adds an x, +, %, or / to the calculation
     addSymbol = (calcParts, text) => {
-        // TODO
+        const { numParts, lastPart, lastChar } = lastInfo(calcParts);
+
+        if (numbers.concat(")").includes(lastChar)) {
+            this.setState({ calcParts: calcParts.concat(text) });
+        }
     };
 
     // add a - to the calculation
