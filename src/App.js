@@ -4,11 +4,10 @@ import { Button, Table, Container } from "reactstrap";
 import "./App.css";
 
 import {
-    getCalculationParts,
+    calculateFromParts,
     lastInfo,
     removeLastDot,
-    countParentheses,
-    solveNoParens
+    countParentheses
 } from "./util";
 
 import socketIOClient from "socket.io-client";
@@ -66,35 +65,6 @@ class App extends Component {
         socket.off("get_data");
         socket.off("change_data");
     }
-
-    // // do the math and then send the resulting string to the server
-    // calculate = () => {
-    //     // get the input string
-    //     let inputEl = document.getElementById("calc-input");
-    //     let input = inputEl.value;
-    //     if (input.length === 0) return;
-    //
-    //     // get an array of numbers and operators
-    //     try {
-    //         var parts = getCalculationParts(input);
-    //     } catch (error) {
-    //         if (typeof error === "string") return this.setState({ error });
-    //         else return this.setState({ error: "Invalid calculation." });
-    //     }
-    //
-    //     // remove the error notification if it exists
-    //     if (this.state.error) this.setState({ error: false });
-    //
-    //     // calculate the result from those parts
-    //     const result = calculateFromParts(parts);
-    //     let equation = `${input} = ${result}`;
-    //
-    //     // send the full equation string to the backend
-    //     sendCalculation(equation);
-    //
-    //     // clear the input box
-    //     inputEl.value = "";
-    // };
 
     // when a button in the calculator is clicked
     onButtonClick = event => {
@@ -267,40 +237,7 @@ class App extends Component {
         if (parts.length === 0 || (parts[0] === "_" && parts.length === 1))
             return;
 
-        // go through the parts start to finish
-        let partIndex = 0;
-        while (parts.length > 1) {
-            let part = parts[partIndex];
-
-            // if this is the last part and it's not a paren, solve it all
-            if (partIndex >= parts.length - 1 && part !== ")")
-                parts = [solveNoParens(parts, 0, partIndex)];
-
-            // any time you find a ), solve the equation in those parentheses
-            if (part === ")") {
-                // find the accompanying "("
-                let prevIndex = partIndex - 1;
-                while (parts[prevIndex] !== "(") prevIndex = prevIndex - 1;
-
-                // solve the parentheses pair and replace that equation with the found value
-                const value = solveNoParens(
-                    parts,
-                    prevIndex + 1,
-                    partIndex - 1
-                );
-                parts = parts
-                    .slice(0, prevIndex)
-                    .concat(value)
-                    .concat(parts.slice(partIndex + 1));
-
-                // set the part index to be the current value (will be increased at end of loop)
-                partIndex = prevIndex;
-            }
-
-            partIndex++;
-        }
-
-        const result = parts[0];
+        const result = calculateFromParts(parts);
 
         // check for divide by 0 errors
         if (isNaN(result) || result === Infinity)
