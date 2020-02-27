@@ -12,7 +12,8 @@ import {
 
 import socketIOClient from "socket.io-client";
 let socket;
-const endpoint = "http://localhost:3001/"; // Update 3001 with port on which backend-my-app/server.js is running.
+// const endpoint = "http://localhost:3001/"; // Update 3001 with port on which backend-my-app/server.js is running.
+const endpoint = "https://young-cliffs-24388.herokuapp.com/";
 socket = socketIOClient(endpoint);
 
 // send the calculation to the database
