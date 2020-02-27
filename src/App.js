@@ -5,10 +5,10 @@ import "./App.css";
 
 import {
     getCalculationParts,
-    calculateFromParts,
     lastInfo,
     removeLastDot,
-    countParentheses
+    countParentheses,
+    solveNoParens
 } from "./util";
 
 import socketIOClient from "socket.io-client";
@@ -67,93 +67,85 @@ class App extends Component {
         socket.off("change_data");
     }
 
-    // go through the parts start to finish
-
-    // any time you find a ), solve the equation in those parentheses
-
-    // then replace everything that was in parentheses with the new number
-
-    // if you get to the end, solve everything
-
-    // 1 x (3 + (4 - ((6 + 8) - 2)) - (10 x 11))
-
-    // do the math and then send the resulting string to the server
-    calculate = () => {
-        // get the input string
-        let inputEl = document.getElementById("calc-input");
-        let input = inputEl.value;
-        if (input.length === 0) return;
-
-        // get an array of numbers and operators
-        try {
-            var parts = getCalculationParts(input);
-        } catch (error) {
-            if (typeof error === "string") return this.setState({ error });
-            else return this.setState({ error: "Invalid calculation." });
-        }
-
-        // remove the error notification if it exists
-        if (this.state.error) this.setState({ error: false });
-
-        // calculate the result from those parts
-        const result = calculateFromParts(parts);
-        let equation = `${input} = ${result}`;
-
-        // send the full equation string to the backend
-        sendCalculation(equation);
-
-        // clear the input box
-        inputEl.value = "";
-    };
+    // // do the math and then send the resulting string to the server
+    // calculate = () => {
+    //     // get the input string
+    //     let inputEl = document.getElementById("calc-input");
+    //     let input = inputEl.value;
+    //     if (input.length === 0) return;
+    //
+    //     // get an array of numbers and operators
+    //     try {
+    //         var parts = getCalculationParts(input);
+    //     } catch (error) {
+    //         if (typeof error === "string") return this.setState({ error });
+    //         else return this.setState({ error: "Invalid calculation." });
+    //     }
+    //
+    //     // remove the error notification if it exists
+    //     if (this.state.error) this.setState({ error: false });
+    //
+    //     // calculate the result from those parts
+    //     const result = calculateFromParts(parts);
+    //     let equation = `${input} = ${result}`;
+    //
+    //     // send the full equation string to the backend
+    //     sendCalculation(equation);
+    //
+    //     // clear the input box
+    //     inputEl.value = "";
+    // };
 
     // when a button in the calculator is clicked
     onButtonClick = event => {
         const text = event.currentTarget.value;
-        console.log("Button clicked: ", text);
-        let { calcParts } = this.state;
+        // remove the error message
+        this.setState({ error: undefined }, () => {
+            let { calcParts } = this.state;
 
-        switch (text) {
-            case "0":
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "8":
-            case "9":
-                this.addNumber(calcParts, text);
-                break;
-            case ".":
-                this.addDecimal(calcParts);
-                break;
-            case "C":
-                this.backspace(calcParts);
-                break;
-            case "(":
-                this.addLeftParenthesis(calcParts);
-                break;
-            case ")":
-                this.addRightParenthesis(calcParts);
-                break;
-            case "%":
-            case "+":
-            case "x":
-            case "/":
-                this.addSymbol(calcParts, text);
-                break;
-            case "-":
-                this.addSubtraction(calcParts);
-                break;
-            case "=":
-                this.calculate(calcParts);
-                break;
-            default:
-                return this.setState({
-                    error: "Something has gone horribly wrong."
-                });
-        }
+            switch (text) {
+                case "0":
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                case "9":
+                    this.addNumber(calcParts, text);
+                    break;
+                case ".":
+                    this.addDecimal(calcParts);
+                    break;
+                case "C":
+                    this.backspace(calcParts);
+                    break;
+                case "(":
+                    this.addLeftParenthesis(calcParts);
+                    break;
+                case ")":
+                    this.addRightParenthesis(calcParts);
+                    break;
+                case "%":
+                case "+":
+                case "x":
+                case "/":
+                    this.addSymbol(calcParts, text);
+                    break;
+                case "-":
+                    this.addSubtraction(calcParts);
+                    break;
+                case "=":
+                    this.calculate(calcParts);
+                    break;
+                default:
+                    return this.setState({
+                        error: "Something has gone horribly wrong."
+                    });
+            }
+        });
     };
 
     // adds a number to the calculation
@@ -199,7 +191,7 @@ class App extends Component {
 
         const lastPartLength = lastPart.length;
         // if the last part is only one character, just remove it
-        if (lastPartLength === 0) calcParts.pop();
+        if (lastPartLength === 1) calcParts.pop();
         // otherwise remove the last character of the last part
         else
             calcParts[numParts - 1] = lastPart.substring(0, lastPartLength - 1);
@@ -236,7 +228,7 @@ class App extends Component {
         const { lastChar } = lastInfo(calcParts);
 
         // if the last character is a number, add a right paren
-        if (numbers.includes(lastChar)) {
+        if (numbers.concat(")").includes(lastChar)) {
             calcParts.push(")");
             this.setState({ calcParts });
         }
@@ -269,27 +261,80 @@ class App extends Component {
 
     // calculate the end result and send it to the backend
     calculate = calcParts => {
-        // TODO
+        // make a copy
+        let parts = calcParts.slice(0);
+        // if there is no equation, don't do anything
+        if (parts.length === 0 || (parts[0] === "_" && parts.length === 1))
+            return;
+
+        // go through the parts start to finish
+        let partIndex = 0;
+        while (parts.length > 1) {
+            let part = parts[partIndex];
+
+            // if this is the last part and it's not a paren, solve it all
+            if (partIndex >= parts.length - 1 && part !== ")")
+                parts = [solveNoParens(parts, 0, partIndex)];
+
+            // any time you find a ), solve the equation in those parentheses
+            if (part === ")") {
+                // find the accompanying "("
+                let prevIndex = partIndex - 1;
+                while (parts[prevIndex] !== "(") prevIndex = prevIndex - 1;
+
+                // solve the parentheses pair and replace that equation with the found value
+                const value = solveNoParens(
+                    parts,
+                    prevIndex + 1,
+                    partIndex - 1
+                );
+                parts = parts
+                    .slice(0, prevIndex)
+                    .concat(value)
+                    .concat(parts.slice(partIndex + 1));
+
+                // set the part index to be the current value (will be increased at end of loop)
+                partIndex = prevIndex;
+            }
+
+            partIndex++;
+        }
+
+        const finalValue = parts[0];
+        console.log("final value: ", finalValue);
+
+        // check for divide by 0 errors
+        if (isNaN(finalValue) || finalValue === Infinity)
+            return this.setState({ error: "Divide by 0 error" });
+
+        // 1 x (3 + (4 - ((6 + 8) - 2)) - (10 x 11))
     };
 
-    showState = () => console.log(this.state.calcParts);
-
-    // TODO CHECK FOR 0 / 0, ANYTHING / 0, DECIMALS
+    getCanClickEnter = () => {
+        const parts = this.state.calcParts;
+        const [leftParens, rightParens] = countParentheses(parts);
+        return (
+            parts.length > 0 &&
+            !["+", "-", "_", ".", "x", "%"].includes(parts[parts.length - 1]) &&
+            leftParens === rightParens
+        );
+    };
 
     render() {
-        const { error, calculations } = this.state;
+        const { error, calculations, calcParts } = this.state;
         return (
             <div className="App">
                 <Container>
                     <h2 className="header">Big Brother Calculator</h2>
 
-                    <button onClick={this.showState}>state</button>
-
                     {!!error && <div className="error">{error}</div>}
-                    <input type="text" id="calc-input" className="calc-input" />
-                    <Button onClick={this.calculate}>Send</Button>
 
-                    <CalcButtons onButtonClick={this.onButtonClick} />
+                    <PartsDisplay parts={calcParts} />
+
+                    <CalcButtons
+                        onButtonClick={this.onButtonClick}
+                        canClickEnter={this.getCanClickEnter()}
+                    />
 
                     <CalculationTable calculations={calculations} />
                 </Container>
@@ -298,11 +343,23 @@ class App extends Component {
     }
 }
 
-const CalcButtons = ({ onButtonClick }) => (
+// reduce all the parts down to one string to show
+const PartsDisplay = ({ parts }) => (
+    <div className="parts-display">{getPartsDisplay(parts)}</div>
+);
+const getPartsDisplay = calcParts => calcParts.reduce(partsReducer, "");
+const partsReducer = (stringSoFar, part) =>
+    stringSoFar + (part.startsWith("_") ? "-" + part.substr(1) : part);
+
+const CalcButtons = ({ onButtonClick, canClickEnter }) => (
     <div className="calc-buttons">
         {buttonTexts.map(text => (
             <div key={text}>
-                <Button onClick={onButtonClick} value={text}>
+                <Button
+                    onClick={onButtonClick}
+                    value={text}
+                    disabled={text === "=" && !canClickEnter}
+                >
                     {text}
                 </Button>
             </div>

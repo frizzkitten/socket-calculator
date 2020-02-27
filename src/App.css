@@ -14,8 +14,9 @@
     text-align: center;
 }
 
-.calc-input {
-    margin: 0 15px;
+.parts-display {
+    height: 20px;
+    margin-bottom: 20px;
 }
 
 .calc-buttons {

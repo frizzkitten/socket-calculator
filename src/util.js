@@ -49,7 +49,7 @@ function getCalculationParts(input) {
 }
 
 // operation functions
-const power = (a, b) => Math.pow(a, b);
+const modulo = (a, b) => a % b;
 const subtract = (a, b) => a - b;
 const add = (a, b) => a + b;
 const multiply = (a, b) => a * b;
@@ -58,29 +58,29 @@ const divide = (a, b) => a / b;
 // get a result from a list of numbers and operators;
 // it's known that every even index will be a number
 // and every odd index will be an operator
-function calculateFromParts(p) {
-    // make a new copy of the parts array
-    let parts = p.slice(0);
-
-    // go through each operator
-    while (parts.length > 1) {
-        // exponents
-        parts = doOperations(parts, [{ symbol: "^", operation: power }]);
-
-        // multiplication and division
-        parts = doOperations(parts, [
-            { symbol: "x", operation: multiply },
-            { symbol: "/", operation: divide }
-        ]);
-        // addition and subtraction
-        parts = doOperations(parts, [
-            { symbol: "+", operation: add },
-            { symbol: "-", operation: subtract }
-        ]);
-    }
-
-    return parts[0];
-}
+// function calculateFromParts(p) {
+//     // make a new copy of the parts array
+//     let parts = p.slice(0);
+//
+//     // go through each operator
+//     while (parts.length > 1) {
+//         // exponents
+//         parts = doOperations(parts, [{ symbol: "^", operation: power }]);
+//
+//         // multiplication and division
+//         parts = doOperations(parts, [
+//             { symbol: "x", operation: multiply },
+//             { symbol: "/", operation: divide }
+//         ]);
+//         // addition and subtraction
+//         parts = doOperations(parts, [
+//             { symbol: "+", operation: add },
+//             { symbol: "-", operation: subtract }
+//         ]);
+//     }
+//
+//     return parts[0];
+// }
 
 // takes in an array of numbers and symbols and a list
 // of wanted operations to do in the form of
@@ -102,8 +102,8 @@ function doOperations(p, operations) {
         if (o) {
             // calculate the result of multiplying or dividing the
             // numbers before and after the operator
-            const num1 = parts[partIndex - 1];
-            const num2 = parts[partIndex + 1];
+            const num1 = parseFloat(parts[partIndex - 1]);
+            const num2 = parseFloat(parts[partIndex + 1]);
             const result = o.operation(num1, num2);
 
             parts = parts
@@ -161,10 +161,35 @@ function countParentheses(calcParts) {
     return [leftCount, rightCount];
 }
 
+// solve an equation that has no parentheses
+function solveNoParens(p, leftIndex, rightIndex) {
+    let parts = p
+        .slice(leftIndex, rightIndex + 1)
+        .map(part =>
+            typeof part === "string" && part.startsWith("_")
+                ? "-" + part.substr(1)
+                : part
+        );
+
+    // multiplication, division, and modulo
+    parts = doOperations(parts, [
+        { symbol: "x", operation: multiply },
+        { symbol: "/", operation: divide },
+        { symbol: "%", operation: modulo }
+    ]);
+    // addition and subtraction
+    parts = doOperations(parts, [
+        { symbol: "+", operation: add },
+        { symbol: "-", operation: subtract }
+    ]);
+
+    return parts[0];
+}
+
 export {
     getCalculationParts,
-    calculateFromParts,
     lastInfo,
     removeLastDot,
-    countParentheses
+    countParentheses,
+    solveNoParens
 };
