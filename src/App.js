@@ -300,14 +300,20 @@ class App extends Component {
             partIndex++;
         }
 
-        const finalValue = parts[0];
-        console.log("final value: ", finalValue);
+        const result = parts[0];
 
         // check for divide by 0 errors
-        if (isNaN(finalValue) || finalValue === Infinity)
+        if (isNaN(result) || result === Infinity)
             return this.setState({ error: "Divide by 0 error" });
 
-        // 1 x (3 + (4 - ((6 + 8) - 2)) - (10 x 11))
+        const input = getPartsDisplay(this.state.calcParts);
+        const equation = `${input} = ${result}`;
+
+        // send the full equation string to the backend
+        sendCalculation(equation);
+
+        // clear the input
+        this.setState({ calcParts: [] });
     };
 
     getCanClickEnter = () => {
